@@ -1,7 +1,11 @@
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 
 public class MovieBookingAppApplication {
 
@@ -9,26 +13,38 @@ public class MovieBookingAppApplication {
 
         int option = 0;
         Util util = new Util();
+        String loggeduserName = "";
 
         ArrayList<Show> shows = new ArrayList<Show>();
-        ArrayList<Booking> bookings = new ArrayList<Booking>();
+        ArrayList<Booking> sessionsBookings = new ArrayList<Booking>();
+        HashMap<String, ArrayList<Booking>> allBookingsDataWithCustomerId = new HashMap<>();
+
         Scanner select = new Scanner(System.in);
         Scanner choice = new Scanner(System.in);
 
+        //Shows , for now added manually.
         shows.add(new Show("RRR - Film", "23.08.2021", "Screen 2", new BigDecimal(120.727), 10, 7));
         shows.add(new Show("Black Panther - Film", "23.08.2021", "Screen 5", new BigDecimal(100), 5, 5));
 
         do {
-            System.out.println("------------------------------------");
-            System.out.println(":Cinema Booking System by Rohit:");
-            System.out.println("------------------------------------\n");
-            //ToDo: System.out.println("Please Enter 0 to Add Show");
-            System.out.println("Please Enter 1 to Display Shows");
-            System.out.println("Please Enter 2 to Make Booking");
-            System.out.println("Please Enter 3 to Cancel Booking");
-            System.out.println("Please Enter 4 to Exit\n");
+            if (loggeduserName.equals("")) {
+                System.out.print("Type what you want to do (login / logout): ");
+                String action = select.next();
 
-            System.out.print("Enter Option: ");
+                if (action.equals("login")) {
+                    System.out.print("If You Are Already User Then Enter your unique UserName: ");
+                    loggeduserName = select.next();
+                    //ToDo: Validate userName.
+                } else {
+                    System.out.println("Bye. logging out...");
+                    System.out.println("Thank You...");
+                    sessionsBookings.clear();
+                    loggeduserName = "";
+                    continue;
+                }
+            }
+
+            Util.optionsToUser();
             option = select.nextInt();
 
             if (option == 1) {
@@ -50,7 +66,7 @@ public class MovieBookingAppApplication {
                 int repeat = 0;
                 System.out.println();
                 do {
-                    util.printSeatPlan(shows.get(showNumber - 1));
+                    util.printSeatPlan(shows.get(showNumber - 1));                  //Print theater
                     System.out.print("Enter the row: ");
                     int selectedRow = choice.nextInt();
                     System.out.print("Enter the seat: ");
@@ -60,9 +76,9 @@ public class MovieBookingAppApplication {
                         break;
                     }
                     System.out.println();
-                    Booking booking = new Booking(shows.get(showNumber - 1));
+                    Booking booking = new Booking(loggeduserName, shows.get(showNumber - 1));
                     if (util.bookSeat(booking, selectedRow - 1, selectedSeat - 1)) {
-                        bookings.add(booking);
+                        sessionsBookings.add(booking);
                         System.out.println("Booked Successfully. The seat is now reserved for you.");
                     } else {
                         System.out.println("Sorry the seat is already reserved.");
@@ -75,28 +91,42 @@ public class MovieBookingAppApplication {
                 System.out.println("Your Bill");
                 System.out.println("-------------------------");
                 BigDecimal totalCost = new BigDecimal(0.0);
-                for (Booking booking : bookings) {
+                for (Booking booking : sessionsBookings) {
                     totalCost = totalCost.add(booking.getShow().getCost());
                 }
                 System.out.println("Total costs: " + totalCost.setScale(2, BigDecimal.ROUND_UP) + " Rupees");
+                String selection;
+                System.out.println("Want to Continue? (y/n)");
+                selection = choice.next();
+                util.bookingConfirmtion(selection, sessionsBookings, allBookingsDataWithCustomerId, totalCost);
                 System.out.println();
             }
 
             if (option == 3) {
                 System.out.println("CANCEL BOOKING Selected");
                 System.out.println("-------------------------\n");
-                for (Booking booking : bookings) {
+                System.out.println("Enter Booking ID:");
+                String selection = choice.next();
+                ArrayList<Booking> bookingByIDForConcellation = allBookingsDataWithCustomerId.get(selection);
+                for (Booking booking : bookingByIDForConcellation) {
                     util.unBookSeat(booking);      //cancelling booking
                 }
-                bookings.clear();
-                System.out.println("Your reservation has been canceled!");
+                allBookingsDataWithCustomerId.remove(selection);
+                System.out.println("Your booking has been canceled!. Payment will be refunded with in 2-3 days.");
                 System.out.println();
             }
 
             if (option == 4) {
-                System.exit(0);
+                util.UsersBookings(loggeduserName, allBookingsDataWithCustomerId);
             }
 
+            if (option == 5) {
+                System.out.println("Bye. logging out...");
+                System.out.println("Thank You...");
+                sessionsBookings.clear();
+                loggeduserName = "";
+                //System.exit(0);
+            }
         } while (true);
     }
 
