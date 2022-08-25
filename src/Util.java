@@ -1,8 +1,26 @@
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 public class Util {
+
+    //Options to User
+    public static void optionsToUser() {
+        System.out.println("------------------------------------");
+        System.out.println(":Cinema Booking System by Rohit:");
+        System.out.println("------------------------------------\n");
+        //ToDo: System.out.println("Please Enter 0 to Add Show");
+        System.out.println("Please Enter 1 to Display Shows");
+        System.out.println("Please Enter 2 to Make Booking");
+        System.out.println("Please Enter 3 to Cancel Booking");
+        System.out.println("Please Enter 4 to See Your Booking");
+        System.out.println("Please Enter 5 to Logout\n");
+
+        System.out.print("Enter Option: ");
+    }
 
     //To print the details of all show.
     public void detailsOfShow(ArrayList<Show> shows) {
@@ -98,9 +116,8 @@ public class Util {
         return true;
     }
 
-    //TODO: To cancel Booking.
     public boolean unBookSeat(Booking booking) {
-        Seat seat = booking.getShow().getRows().get(booking.rowNumber).getSeats().get(booking.seatNumber);
+        Seat seat = booking.getShow().getRows().get(booking.getRowNumber()).getSeats().get(booking.getSeatNumber());
         unReserveSeat(seat);
         return true;
     }
@@ -109,6 +126,38 @@ public class Util {
     public void unReserveSeat(Seat seat)
     {
         seat.setReserved(false);
+    }
+
+
+    //Booking Confirmation
+    public void bookingConfirmtion(String selection, ArrayList<Booking> sessionsBookings, HashMap<String, ArrayList<Booking>> allBookingsDataWithCustomerId, BigDecimal totalCost) {
+        if(selection.equals("y")) {
+            Random rnd = new Random();
+            Integer costumerId = rnd.nextInt(999);
+            allBookingsDataWithCustomerId.put(costumerId.toString(), new ArrayList<>(sessionsBookings));        //
+            sessionsBookings.clear();
+            System.out.println("Payment of " + totalCost.setScale(2, BigDecimal.ROUND_UP) + " Rupees is successful.");
+            System.out.println("Booking ID: " + costumerId);
+        } else {
+            System.out.println("Booking is Suspended by user.");
+
+            for (Booking booking : sessionsBookings) {
+                unBookSeat(booking);      //cancelling booking
+            }
+            sessionsBookings.clear();
+        }
+
+    }
+
+    //See user's All Bookings
+    public void UsersBookings(String loggeduserName, HashMap<String, ArrayList<Booking>> allBookingsDataWithCustomerId) {
+        for(Map.Entry<String, ArrayList<Booking>> entryset : allBookingsDataWithCustomerId.entrySet()) {
+            String finalLoggeduserName = loggeduserName;
+            entryset.getValue().stream()
+                    .filter(booking -> booking.getUserName().equals(finalLoggeduserName))
+                    .forEach(booking -> System.out.println(booking.getUserName() + " - " + booking.getShow().getShowName() + " - Row: " + (booking.getRowNumber()+1) + " - Seat: " + (booking.getSeatNumber()+1)));
+        }
+
     }
 
 
