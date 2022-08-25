@@ -151,11 +151,14 @@ public class Util {
 
     //See user's All Bookings
     public void UsersBookings(String loggeduserName, HashMap<String, ArrayList<Booking>> allBookingsDataWithCustomerId) {
+        System.out.println("-------------------------");
+        System.out.println("Booking List of: "+ loggeduserName);
+        System.out.println("-------------------------\n");
         for(Map.Entry<String, ArrayList<Booking>> entryset : allBookingsDataWithCustomerId.entrySet()) {
             String finalLoggeduserName = loggeduserName;
             entryset.getValue().stream()
                     .filter(booking -> booking.getUserName().equals(finalLoggeduserName))
-                    .forEach(booking -> System.out.println(booking.getUserName() + " - " + booking.getShow().getShowName() + " - Row: " + (booking.getRowNumber()+1) + " - Seat: " + (booking.getSeatNumber()+1)));
+                    .forEach(booking -> System.out.println(booking.getUserName() + " - ID: " + entryset.getKey()+ " - " + booking.getShow().getShowName() + " - Row: " + (booking.getRowNumber()+1) + " - Seat: " + (booking.getSeatNumber()+1)));
         }
 
     }

@@ -107,8 +107,12 @@ public class MovieBookingAppApplication {
                 System.out.println("-------------------------\n");
                 System.out.println("Enter Booking ID:");
                 String selection = choice.next();
-                ArrayList<Booking> bookingByIDForConcellation = allBookingsDataWithCustomerId.get(selection);
-                for (Booking booking : bookingByIDForConcellation) {
+                ArrayList<Booking> bookingByIDForCancellation = allBookingsDataWithCustomerId.get(selection);
+                if(null == bookingByIDForCancellation) {
+                    System.out.println("Invalid Booking ID");
+                    continue;
+                }
+                for (Booking booking : bookingByIDForCancellation) {
                     util.unBookSeat(booking);      //cancelling booking
                 }
                 allBookingsDataWithCustomerId.remove(selection);
